@@ -141,27 +141,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <?php
                 $itemQuantity = $conn->query("SELECT quantity_bought FROM inventory WHERE property_number = '{$request['property_number']}'")->fetchColumn();
                 if ($itemQuantity > 0) {
-					if (!$request['date_borrowed']) {
-						echo '<form action="" method="post">';
-						echo '<input type="hidden" name="request_id" value="' . $request['id'] . '">';
-						if ($itemQuantity >= $request['quantity']) {
+                    if (!$request['date_borrowed']) {
+                        echo '<form action="" method="post">';
+                        echo '<input type="hidden" name="request_id" value="' . $request['id'] . '">';
+                        if ($itemQuantity >= $request['quantity']) {
 							echo '<button type="submit" name="confirm">Confirm</button>';
 						} else {
-							echo 'Item borrowed, awaiting return';
+							echo '<button type="button" disabled>Confirm</button>';
+							echo '<p class="error-message">Insufficient quantity available for borrowing.</p>';
 						}
-						echo '</form>';
-					} elseif (!$request['date_returned']) {
-						echo '<form action="" method="post">';
-						echo '<input type="hidden" name="request_id" value="' . $request['id'] . '">';
-						echo '<button type="submit" name="returned">Returned</button>';
-						echo '</form>';
-					} else {
-						echo 'This item has been returned';
-					}
-				} else {
-					echo "All items deployed";
-				}
 
+						echo '</form>';
+                    } elseif (!$request['date_returned']) {
+                        echo '<form action="" method="post">';
+                        echo '<input type="hidden" name="request_id" value="' . $request['id'] . '">';
+                        echo '<button type="submit" name="returned">Returned</button>';
+                        echo '</form>';
+                    } else {
+                        echo 'This has been returned';
+                    }
+                } else {
+                    echo "Item All Deployed";
+                }
                 ?>
             </td>
 				<td>
@@ -178,6 +179,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 							<input type="hidden" name="request_id" value="<?php echo $request['id']; ?>">
 							<button type="submit" name="returned" <?php if (isset($_SESSION['returned_' . $request['id']])) echo 'disabled'; ?>>Returned</button>
 						</form>
+						<?php
+						// Disable the button if it's clicked once
+						if (isset($_POST['returned'])) {
+							$_SESSION['returned_' . $request['id']] = true;
+						}
+						?>
 					<?php elseif ($request['date_returned'] && $request['date_returned'] !== '0000-00-00') : ?>
 						<?php echo $request['date_returned']; ?>
 					<?php endif; ?>
